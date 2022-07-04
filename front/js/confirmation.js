@@ -1,8 +1,5 @@
-
-
-
+//Définition du numéro de commande
 const IDCOMMANDE = () => {
-//Nettoyage du localStorage
 localStorage.clear();
 
 
@@ -24,4 +21,6 @@ tention.style.fontWeight = "bolder";
 }
 
 IDCOMMANDE()
+
+
 
