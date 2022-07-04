@@ -1,12 +1,28 @@
 // On récupère les informations dans le localStorage
 let panier = JSON.parse(localStorage.getItem("produit"));
 
-//SI tu as bien des informations qui sont dans le localStorage, alors tu peux lancer la fonction
+
+//Affichage des produits selectionnés dans la page panier
 const AFFICHAGEPANIER = async () => {
+  let panier = JSON.parse(localStorage.getItem("produit"))
 if (panier) {
     await panier;
 }
 
+//Nous récupérons les informations de l'API afin de définir le prix du produit en fonction de l'APi et pas du localStorage
+  await fetch(`http://localhost:3000/api/products/`)
+  .then((rep) => rep.json())
+  .then((promise) => {
+      canapProduit = promise;
+  }) 
+
+//Le prix dans le localStorage correspondra toujours au prix dans l'API, par mesure de sécurité
+canapProduit.forEach((variable) => {
+  for(let i in panier){
+    if(panier[i]._id == variable._id)
+    {
+      panier[i].price = variable.price,
+ 
 cart__items.innerHTML = panier.map((produit) => `
 <article class="cart__item" data-id="{product-ID}" data-color="{product-color}">
                 <div class="cart__item__img">
@@ -16,7 +32,7 @@ cart__items.innerHTML = panier.map((produit) => `
                   <div class="cart__item__content__description">
                     <h2>${produit.name}</h2>
                     <p>Couleur : ${produit.couleur}</p>
-                    <p>Prix : ${produit.price} €</p>
+                    <span class= ".cart__price .cart__price p" id= "prix">  ${produit.price}€ </span>
                   </div>
                   <div class="cart__item__content__settings">
                     <div class="cart__item__content__settings__quantity">
@@ -30,13 +46,18 @@ cart__items.innerHTML = panier.map((produit) => `
                 </div>
               </article>
 `).join("");
-
-SUPPRIMERPANIER();
-MODIFQUANTITE();
-TOTALPRODUIT();
-}
+};     
+    };
+    
+  });
+  SUPPRIMERPANIER();
+  MODIFQUANTITE();
+  TOTALPRODUIT();
+};
 
 AFFICHAGEPANIER();
+
+
 
 //Modification des éléments du panier de manière dynamique
 const MODIFQUANTITE  = async () => {
@@ -86,9 +107,8 @@ return (
 else {
   for(let i in panier) {
   if(
-    panier[i]._id !== produitCorbeille.dataset.id ||
-    panier[i].couleur !== produitCorbeille.dataset.color
-  )
+    totalPanierSupprimer > 1
+  )//On garde les éléments qui sont différents par la méthode filtre
   return (
   panierRemove = panier.filter(
      (el) => el._id !== produitCorbeille.dataset.id ||
@@ -114,8 +134,8 @@ let totalArticle = 0;
 let prixArticle = 0;
 let prixTotal = 0;
 
-  for (let article of panier) {
 let panier = JSON.parse(localStorage.getItem("produit")); 
+  for (let article of panier) {
 totalArticle += JSON.parse(article.quantite);
 prixArticle =  JSON.parse(article.quantite) * JSON.parse(article.price);
 prixTotal += prixArticle
@@ -291,7 +311,7 @@ EMAIL.addEventListener("input", () => {
     )
 });
 
-//Nous créons un boutton pour coammnder que nous méttons en display none pour le moment
+//Nous créons un boutton pour commander que nous méttons en display none pour le moment
 const BTN = document.createElement("input");
     BTN.className ="cart__order__form__submit";
     BTN.setAttribute("id", "commander");
@@ -300,7 +320,11 @@ const BTN = document.createElement("input");
     const PLACEBOUTTON = document.querySelector(".cart__order__form__submit");
     PLACEBOUTTON.appendChild(BTN);
     BTN.style.display="none"
-       
+
+
+
+
+
 //Fonction pour valider le formulaire
 const FORMULAIRE = () => {
   let displayButton = document.querySelector("#order");
@@ -308,7 +332,7 @@ const FORMULAIRE = () => {
   {displayButton.value= "Valider le formulaire"}
   
   displayButton.addEventListener("click", (even) => {
-//On indique une condition pour que tous les champs soient remplis dans LocalStorage afin de pouvoir envoyer le formulaire
+//On indique une condition pour que tous les champs soient remplis dans LocalStorage avant de pouvoir envoyer le formulaire
 if (
   "firstName" in localStorage &&
   "lastName" in localStorage &&
@@ -321,9 +345,7 @@ if (
     even.preventDefault();
     displayButton.style.display= "none";
     alert("Formulaire validé");
-    BTN.style.display= "block";
-   
-    
+    BTN.style.display= "block"; 
     }
     else (
       alert("Veuillez respecter les consignes du formulaire"),
@@ -332,10 +354,6 @@ if (
   })
 };
 
-FORMULAIRE();
-
-const VALIDERPANIER = () => {
-  
    BTNCOMMANDER = document.getElementById("commander");
     BTNCOMMANDER.addEventListener("click", (even) => {  
       if(
@@ -354,23 +372,17 @@ const VALIDERPANIER = () => {
       city : localStorage.getItem("city"),
       email : localStorage.getItem("email"),
     },
-    localStorage.setItem("INFOCLIENT",JSON.stringify(OBJETFORMULAIRE)),
-    alert("Commande confirmée")
+    localStorage.setItem("INFOCLIENT",JSON.stringify(OBJETFORMULAIRE))
       )
       else(
         alert("Veuillez respecter les consignes du formulaire"),
         even.preventDefault()
         )
  })
-  };
-
-VALIDERPANIER();
+  FORMULAIRE();
   
 
 // Récupération des informations nécessaires avant envoi vers le serveur
-let contactRef;
-let commandeFinale;
-let commandeProduit;
 let panierID = [];
 
 const PAQUET = () => { 
@@ -408,16 +420,19 @@ const ENVOISERVEUR = async () => {
       },
       body: JSON.stringify(commandeFinale),
 })
-//Récupération de l'ID de commande de la requête POST
+
 .then((rep) => rep.json())
 .then((promise) => {
   console.log(promise.orderId);
-//Renvoie vers la page confirmation avec l'ID de commande dans l'URL
   window.location.href = `/front/html/confirmation.html?Id_commande=${promise.orderId}`;
 })
 };
 
 ENVOISERVEUR();
+
+
+
+
 
 
 
