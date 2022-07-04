@@ -1,6 +1,8 @@
 //Récupération de l'ID dans l'URL
 let recuperation_id_url = window.location.search;
 const URLFINALE = new URLSearchParams(recuperation_id_url);
+console.log(URLFINALE)
+//On utiliser la méthode split pour ne garder que l'ID (ce qu'il y a entre parenthèses) afin que l'API puisse nous restituer le produit
 const ID = URLFINALE.get("id").split("=").join("");
 console.log(ID)
 
@@ -41,8 +43,9 @@ const AFFICHAGEPRODUIT = async () => {
 //On importe l'Id du produit dans le bouton panier
     document.getElementById("addToCart").setAttribute("id",`${canapProduit._id}`);
 
+
+
 //On indique la couleur du canapé de l'Array avec la méthode for each car nous n'avons pas besoin de créer un nouveau tableau
-//On se place dans la balise du DOM correspondant
 let option_value = document.getElementById("colors");
 canapProduit.colors.forEach((couleur) => {
 //Pour respecter la nomenclature d'un élément déroulant, nous créons une balise option à laquelle nous rajoutons .value
@@ -51,30 +54,28 @@ canapProduit.colors.forEach((couleur) => {
     option.value = `${couleur}`; 
     option_value.appendChild(option);
 })
-
 AJOUT_PANIER(canapProduit);
 }
  
 AFFICHAGEPRODUIT();
 
+
+
 //Ajouter des éléments au panier
 const AJOUT_PANIER = () => {
-//On récupère l'ID du bouton
     let bouton = document.getElementById(canapProduit._id);
 
-//On récupère la couleur voulue au clic
     bouton.addEventListener("click", () => {
-//récupère dans le localStorage
     let produitStorage = JSON.parse(localStorage.getItem("produit"));
-//On demande à récupérer la balise colors et quantité lors du clic
-        let selectionCouleur = document.getElementById ("colors");
-        let option_quantite = document.getElementById("quantity");
+    let selectionCouleur = document.getElementById ("colors");
+    let option_quantite = document.getElementById("quantity");
 
 //On créer un objet dans l'Array représentant la couleur choisie et la quantité
 const CHOIXCANAP = Object.assign({}, canapProduit, {
     couleur : `${selectionCouleur.value}`,
     quantite : Number(`${option_quantite.value}`),
 });
+
 
 
 //On rajoute cette condition pour que l'utilisateur définisse une quantité
@@ -135,7 +136,7 @@ else {
     
 //Nous retourne l'élément du tableau pour pouvoir en rajouter
 return (produitStorage = JSON.parse(localStorage.getItem("produit")));
-
         }; 
     }
 )}
+
